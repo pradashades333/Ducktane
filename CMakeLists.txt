@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(MassiveSynth VERSION 1.0.0)
+project(MassiveSynth VERSION 1.0.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,7 +31,7 @@ juce_add_plugin(MassiveSynth
     PLUGIN_MANUFACTURER_CODE MySt
     PLUGIN_CODE             DkTn
     PRODUCT_NAME            "Ducktane"
-    VERSION                 "1.0.0"
+    VERSION                 "1.0.1"
 
     # --- Formats ---
     FORMATS                 VST3 AU Standalone
