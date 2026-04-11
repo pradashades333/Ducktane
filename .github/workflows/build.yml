@@ -1,0 +1,177 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  # ── macOS — VST3 + AU + .pkg installer ──────────────────────────────────
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone JUCE
+        run: git clone --depth 1 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" \
+            -DJUCE_BUILD_EXAMPLES=OFF \
+            -DJUCE_BUILD_EXTRAS=OFF
+
+      - name: Build VST3
+        run: cmake --build build --config Release --target MassiveSynth_VST3 -j$(sysctl -n hw.ncpu)
+
+      - name: Build AU
+        run: cmake --build build --config Release --target MassiveSynth_AU -j$(sysctl -n hw.ncpu)
+
+      - name: Verify outputs
+        run: |
+          echo "=== Build artefacts ==="
+          find build/MassiveSynth_artefacts -maxdepth 4 \( -name "*.vst3" -o -name "*.component" \) -type d
+          test -d "build/MassiveSynth_artefacts/Release/VST3/Ducktane.vst3"
+          test -d "build/MassiveSynth_artefacts/Release/AU/Ducktane.component"
+          echo "Both VST3 and AU built OK."
+
+      - name: Strip quarantine + sign VST3
+        run: |
+          VST3=$(find build -name "*.vst3" -type d | head -1)
+          echo "VST3: $VST3"
+          xattr -cr "$VST3"
+          codesign --force --deep --sign - "$VST3"
+          codesign --verify --deep "$VST3" && echo "VST3 signature OK"
+
+      - name: Strip quarantine + sign AU
+        run: |
+          AU=$(find build -name "*.component" -type d | head -1)
+          echo "AU: $AU"
+          xattr -cr "$AU"
+          codesign --force --deep --sign - "$AU"
+          codesign --verify --deep "$AU" && echo "AU signature OK"
+
+      - name: Build .pkg installer
+        run: |
+          set -e
+
+          VST3=$(find build -name "*.vst3"      -type d | head -1)
+          AU=$(find   build -name "*.component" -type d | head -1)
+          echo "VST3: $VST3"
+          echo "AU:   $AU"
+
+          pkgbuild \
+            --component      "$VST3" \
+            --identifier     com.mystudio.ducktane.vst3 \
+            --version        1.0.0 \
+            --install-location "/Library/Audio/Plug-Ins/VST3" \
+            Ducktane-VST3.pkg
+
+          pkgbuild \
+            --component      "$AU" \
+            --identifier     com.mystudio.ducktane.au \
+            --version        1.0.0 \
+            --install-location "/Library/Audio/Plug-Ins/Components" \
+            Ducktane-AU.pkg
+
+          cat > distribution.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <installer-gui-script minSpecVersion="2">
+              <title>Ducktane v1.0</title>
+              <options customize="never" require-scripts="false"/>
+              <domains enable_localSystem="true" enable_currentUserHome="false"/>
+              <choices-outline>
+                  <line choice="vst3"/>
+                  <line choice="au"/>
+              </choices-outline>
+              <choice id="vst3" title="VST3 Plugin" selected="true" enabled="true">
+                  <pkg-ref id="com.mystudio.ducktane.vst3"/>
+              </choice>
+              <choice id="au" title="AU Plugin" selected="true" enabled="true">
+                  <pkg-ref id="com.mystudio.ducktane.au"/>
+              </choice>
+              <pkg-ref id="com.mystudio.ducktane.vst3">Ducktane-VST3.pkg</pkg-ref>
+              <pkg-ref id="com.mystudio.ducktane.au">Ducktane-AU.pkg</pkg-ref>
+          </installer-gui-script>
+          EOF
+
+          productbuild \
+            --distribution distribution.xml \
+            --package-path . \
+            "Ducktane-macOS-Installer.pkg"
+
+          echo "=== component package sizes ==="
+          ls -lh Ducktane-VST3.pkg Ducktane-AU.pkg
+          echo "=== final installer size ==="
+          ls -lh Ducktane-macOS-Installer.pkg
+
+          pkgutil --expand Ducktane-macOS-Installer.pkg installer_check
+          echo "=== installer contents ==="
+          ls installer_check/
+          find installer_check -name "Ducktane" -o -name "Ducktane.vst3" -o -name "Ducktane.component" 2>/dev/null | head -10
+          rm -rf installer_check
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ducktane-macOS-Installer
+          path: Ducktane-macOS-Installer.pkg
+
+      - name: Upload VST3 (zip)
+        run: |
+          VST3=$(find build -name "*.vst3" -type d | head -1)
+          cd "$(dirname "$VST3")" && zip -r "$GITHUB_WORKSPACE/Ducktane-macOS-VST3.zip" "$(basename "$VST3")"
+
+      - name: Upload AU (zip)
+        run: |
+          AU=$(find build -name "*.component" -type d | head -1)
+          cd "$(dirname "$AU")" && zip -r "$GITHUB_WORKSPACE/Ducktane-macOS-AU.zip" "$(basename "$AU")"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ducktane-macOS-VST3
+          path: Ducktane-macOS-VST3.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ducktane-macOS-AU
+          path: Ducktane-macOS-AU.zip
+
+  # ── Windows — VST3 only ──────────────────────────────────────────────────
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone JUCE
+        run: git clone --depth 1 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DJUCE_BUILD_EXAMPLES=OFF `
+            -DJUCE_BUILD_EXTRAS=OFF
+
+      - name: Build VST3
+        run: cmake --build build --config Release --target MassiveSynth_VST3 -j $env:NUMBER_OF_PROCESSORS
+
+      - name: Package VST3
+        shell: bash
+        run: |
+          VST3=$(find build -name "*.vst3" -type d | head -1)
+          echo "Found: $VST3"
+          cd "$(dirname "$VST3")"
+          7z a "$GITHUB_WORKSPACE/Ducktane-Windows-VST3.zip" "$(basename "$VST3")"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ducktane-Windows-VST3
+          path: Ducktane-Windows-VST3.zip

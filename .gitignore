@@ -1,0 +1,25 @@
+# Build output
+build/
+
+# JUCE (cloned fresh in CI; keep locally but don't commit — 93 MB)
+JUCE/
+
+# IDE / Windows
+.vs/
+*.user
+*.suo
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+
+# macOS
+.DS_Store
+*.dSYM/
+
+# CLion
+cmake-build-*/
+.idea/
+
+# Temp
+*.log
+*.tmp
