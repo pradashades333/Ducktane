@@ -10,6 +10,7 @@ static constexpr int kMainH   = kH - kTopBarH - kFxH; // 483
 MassiveSynthAudioProcessorEditor::MassiveSynthAudioProcessorEditor (MassiveSynthAudioProcessor& p)
     : AudioProcessorEditor (&p),
       audioProcessor  (p),
+      licenseOverlay  (licenseManager),
       presetManager   (p.apvts),
       presetPanel     (p.apvts, presetManager),
       osc1Panel       (p.apvts, "osc1_", "OSC 1"),
@@ -58,6 +59,19 @@ MassiveSynthAudioProcessorEditor::MassiveSynthAudioProcessorEditor (MassiveSynth
     // Give each waveform display a pointer to the processor's scope ring buffer
     osc1Panel.getWaveDisplay().setScopeBuffer (&p.scopeBuffer);
     osc2Panel.getWaveDisplay().setScopeBuffer (&p.scopeBuffer);
+
+    // ---- License overlay (floats on top of everything) ----
+    addChildComponent (licenseOverlay);
+    licenseOverlay.onActivated = [this]
+    {
+        licenseOverlay.setVisible (false);
+    };
+
+    if (! licenseManager.isActivated())
+    {
+        licenseOverlay.setVisible (true);
+        licenseOverlay.toFront (false);
+    }
 
     setSize (kW, kH);
     setResizable (false, false);
@@ -120,4 +134,7 @@ void MassiveSynthAudioProcessorEditor::resized()
 
     // ---- Browser overlay (full editor, floats on top) ----
     browserPanel.setBounds (getLocalBounds());
+
+    // ---- License overlay (full editor, floats above everything) ----
+    licenseOverlay.setBounds (getLocalBounds());
 }

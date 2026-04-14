@@ -23,3 +23,16 @@ cmake-build-*/
 # Temp
 *.log
 *.tmp
+
+# License keys / keygen — never commit
+keygen.py
+KEYS.TXT
+*.lic
+
+# Claude memory
+.claude/
+
+# Stray files
+*.jpeg
+*.jpg
+_wf.yml

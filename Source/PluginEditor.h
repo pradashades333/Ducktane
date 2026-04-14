@@ -9,7 +9,9 @@
 #include "UI/LfoPanel.h"
 #include "UI/FxPanel.h"
 #include "UI/BrowserPanel.h"
+#include "UI/LicenseOverlay.h"
 #include "Data/PresetManager.h"
+#include "Data/LicenseManager.h"
 
 class MassiveSynthAudioProcessorEditor : public juce::AudioProcessorEditor
 {
@@ -24,6 +26,9 @@ private:
     MassiveSynthAudioProcessor& audioProcessor;
 
     CustomLookAndFeel laf;
+
+    LicenseManager   licenseManager;
+    LicenseOverlay   licenseOverlay;
 
     PresetManager    presetManager;
     PresetPanel      presetPanel;

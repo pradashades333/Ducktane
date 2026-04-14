@@ -1,4 +1,4 @@
-name: Build
+name: Build Ducktane
 
 on:
   push:
@@ -14,8 +14,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Clone JUCE
-        run: git clone --depth 1 https://github.com/juce-framework/JUCE.git JUCE
+      - name: Fetch JUCE 8.0.12
+        run: git clone --depth 1 --branch 8.0.12 https://github.com/juce-framework/JUCE.git JUCE
 
       - name: Configure CMake
         run: |
@@ -150,8 +150,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Clone JUCE
-        run: git clone --depth 1 https://github.com/juce-framework/JUCE.git JUCE
+      - name: Fetch JUCE 8.0.12
+        run: git clone --depth 1 --branch 8.0.12 https://github.com/juce-framework/JUCE.git JUCE
 
       - name: Configure CMake
         run: |

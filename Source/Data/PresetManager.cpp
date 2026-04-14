@@ -202,6 +202,10 @@ void PresetManager::installFactoryPresetsIfNeeded()
     savePreset ("008 Lo-Fi Keys", "KEYS");
 
     refreshPresetList();
+
+    // Auto-load the first preset so the plugin starts with a valid sound
+    if (! presetNames.isEmpty())
+        loadPreset (presetNames[0]);
 }
 
 juce::StringArray PresetManager::getCategories()

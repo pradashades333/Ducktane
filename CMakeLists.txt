@@ -111,13 +111,19 @@ target_sources(MassiveSynth
         Source/UI/PresetPanel.cpp
         Source/UI/PresetPanel.h
 
-        # Data / Preset management
+        # Data / Preset management + licensing
         Source/Data/PresetManager.cpp
         Source/Data/PresetManager.h
+        Source/Data/LicenseManager.cpp
+        Source/Data/LicenseManager.h
 
         # Browser
         Source/UI/BrowserPanel.cpp
         Source/UI/BrowserPanel.h
+
+        # License overlay
+        Source/UI/LicenseOverlay.cpp
+        Source/UI/LicenseOverlay.h
 )
 
 # ============================================================
