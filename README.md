@@ -13,7 +13,7 @@ A polyphonic VST3/AU software synthesizer built with JUCE/C++, inspired by Xfer 
 - Real-time oscilloscope waveform display
 - Preset browser with categories (Bass, Lead, Pad, Keys, Stab, Soundscape…)
 - Preset import/export — share presets as `.xml` files
-- 8 factory presets included
+- 8 factory presets included (auto-loaded on first launch)
 
 ## Formats
 
