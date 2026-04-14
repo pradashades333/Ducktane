@@ -28,12 +28,14 @@ Go to [Actions](../../actions) → latest run → **Artifacts** to download the 
 
 ## Building locally
 
-Requirements: CMake 3.22+, Visual Studio 2022 (Windows) or Xcode (macOS).
+Requirements: CMake 3.22+, Visual Studio 2022 (Windows) or Xcode (macOS), JUCE 8.0.12.
 
 ```bash
 git clone https://github.com/pradashades333/Ducktane.git
 cd Ducktane
-git clone --depth 1 https://github.com/juce-framework/JUCE.git JUCE
+git clone --depth 1 --branch 8.0.12 https://github.com/juce-framework/JUCE.git JUCE
 cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+cmake --build build --config Release --target MassiveSynth_VST3
 ```
+
+> On macOS, replace `MassiveSynth_VST3` with `MassiveSynth_AU` to build the Audio Unit instead.
