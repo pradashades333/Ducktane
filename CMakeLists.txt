@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
+# Ducktane — polyphonic VST3/AU synthesizer
+# Requires JUCE 8.0.12 in a sibling JUCE/ directory
 project(MassiveSynth VERSION 1.0.1)
 
 set(CMAKE_CXX_STANDARD 17)
