@@ -18,7 +18,7 @@ class Oscillator
 {
 public:
     enum class Waveform { Sine = 0, Triangle, Saw, Square };
-    static constexpr int kMaxUnison = 7;
+    static constexpr int kMaxUnison = 7;  // 1, 3, 5, or 7 recommended for even stereo spread
 
     void prepare (double sampleRate) noexcept;
 
